@@ -1,0 +1,47 @@
+{
+  "name": "glowr",
+  "version": "0.3.1",
+  "private": true,
+  "description": "Mine subtitle sentences and audio from S4C Clic, BBC iPlayer and YouTube into Anki.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs --target all",
+    "build:firefox": "node scripts/build.mjs --target firefox",
+    "build:chrome": "node scripts/build.mjs --target chrome",
+    "dev:firefox": "node scripts/build.mjs --target firefox --watch",
+    "dev:chrome": "node scripts/build.mjs --target chrome --watch",
+    "start:firefox": "web-ext run --source-dir dist/firefox",
+    "start:chrome": "web-ext run --source-dir dist/chrome --target chromium",
+    "package": "npm run build && node scripts/package.mjs",
+    "icons": "node scripts/icons.mjs",
+    "promo": "node scripts/promo.mjs",
+    "screenshots": "node scripts/screenshots.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "web-ext lint --source-dir dist/firefox",
+    "check": "npm run typecheck && npm test && npm run build && npm run lint"
+  },
+  "dependencies": {
+    "lamejs": "1.2.1",
+    "lucide": "1.77.0",
+    "webextension-polyfill": "0.12.0"
+  },
+  "devDependencies": {
+    "@types/webextension-polyfill": "0.12.6",
+    "esbuild": "0.28.2",
+    "playwright": "^1.65.1",
+    "sharp": "0.35.5",
+    "typescript": "5.9.3",
+    "vitest": "5.1.1",
+    "web-ext": "10.8.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gitbugr/glowr.git"
+  },
+  "homepage": "https://gitbugr.github.io/glowr/",
+  "engines": {
+    "node": ">=22"
+  }
+}

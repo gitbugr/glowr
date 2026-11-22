@@ -1,0 +1,6 @@
+node_modules/
+dist/
+web-ext-artifacts/
+scripts/screenshots/demo/
+*.log
+.DS_Store

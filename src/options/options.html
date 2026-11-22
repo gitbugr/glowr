@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Glöwr settings</title>
+<link rel="icon" href="icons/icon-32.png" />
+<style>
+  :root {
+    --bg: #0f1115; --card: #171a21; --line: #272b35; --fg: #e9ecf1;
+    --muted: #9aa3b2; --accent: #2ea8ff; --accent-bg: rgba(46,168,255,.16);
+    --ok: #3ccf8e; --warn: #f5b142; --err: #ff6b6b;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f4f6f9; --card: #fff; --line: #dfe3ea; --fg: #151a22;
+      --muted: #5d6675; --accent: #0b84d8; --accent-bg: rgba(11,132,216,.12);
+      --ok: #16955f; --warn: #a86400; --err: #c9302c;
+      color-scheme: light;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 640px; margin: 0 auto; padding: 32px 16px 64px; }
+  header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+  header img { width: 56px; height: 56px; }
+  h1 { margin: 0; font-size: 22px; letter-spacing: .2px; }
+  header p { margin: 2px 0 0; color: var(--muted); }
+  section { background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 18px 20px 20px; margin-bottom: 16px; }
+  h2 { display: flex; align-items: center; gap: 8px; margin: 0 0 4px;
+    font-size: 15px; }
+  h2 .sp { flex: 1; }
+  .hint { color: var(--muted); font-size: 12.5px; margin: 0 0 12px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+  label { display: block; }
+  label > span { display: block; font-size: 12.5px; font-weight: 600;
+    color: var(--muted); margin-bottom: 5px; }
+  .full { grid-column: 1 / -1; }
+  select, input { width: 100%; height: 36px; padding: 0 10px; font: inherit;
+    color: var(--fg); background: var(--bg); border: 1px solid var(--line);
+    border-radius: 8px; outline: none; }
+  input.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+  select:focus, input:focus { border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-bg); }
+  select:disabled { opacity: .6; }
+  .conn { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px;
+    font-weight: 500; color: var(--muted); }
+  .conn::before { content: ""; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--muted); }
+  .conn.ok { color: var(--ok); } .conn.ok::before { background: var(--ok); }
+  .conn.err { color: var(--err); } .conn.err::before { background: var(--err); }
+  button { display: inline-flex; align-items: center; gap: 6px; height: 30px;
+    padding: 0 10px; font: inherit; font-size: 13px; color: var(--fg);
+    background: transparent; border: 1px solid var(--line); border-radius: 8px;
+    cursor: pointer; }
+  button:hover { background: var(--accent-bg); }
+  .ic { width: 15px; height: 15px; }
+  .banner { display: none; margin: 0 0 14px; padding: 10px 12px; border-radius: 8px;
+    background: rgba(255,107,107,.1); color: var(--err); font-size: 13px; }
+  .banner.show { display: block; }
+  .banner code { color: var(--fg); }
+  .switch { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
+  .switch input { appearance: none; flex: none; width: 36px; height: 20px; margin: 1px 0 0;
+    padding: 0; border-radius: 99px; background: var(--line); border: 0; position: relative;
+    cursor: pointer; transition: background .15s; }
+  .switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px;
+    height: 16px; border-radius: 50%; background: #fff; transition: transform .15s;
+    box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+  .switch input:checked { background: var(--accent); }
+  .switch input:checked::after { transform: translateX(16px); }
+  .switch input:focus-visible { box-shadow: 0 0 0 3px var(--accent-bg); }
+  label.switch > span { margin: 0; font-size: 14px; font-weight: 600; color: var(--fg); }
+  .switch small { display: block; margin-top: 2px; color: var(--muted); font-size: 12.5px;
+    font-weight: 400; line-height: 1.45; }
+  .warnf { color: var(--muted); font-size: 12px; margin-top: 4px; display: none; }
+  .warnf.show { display: block; }
+  #saved { position: fixed; bottom: 20px; left: 50%; transform: translate(-50%, 12px);
+    padding: 8px 14px; border-radius: 10px; background: var(--card);
+    border: 1px solid var(--line); box-shadow: 0 8px 30px rgba(0,0,0,.25);
+    display: flex; gap: 8px; align-items: center; opacity: 0;
+    transition: all .2s; pointer-events: none; }
+  #saved.show { opacity: 1; transform: translate(-50%, 0); }
+  #saved .ic { color: var(--ok); }
+  details { background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 0 20px; margin-bottom: 16px; }
+  details[open] { padding-bottom: 20px; }
+  summary { display: flex; align-items: center; gap: 8px; padding: 16px 0; font-size: 15px;
+    font-weight: 700; cursor: pointer; list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  summary .ic { transition: transform .15s; color: var(--muted); }
+  details[open] summary .ic { transform: rotate(90deg); }
+  details > .hint { margin-top: -6px; }
+  h3 { margin: 20px 0 8px; font-size: 13px; text-transform: uppercase; letter-spacing: .5px;
+    color: var(--muted); }
+  label small { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+  label small.err { color: var(--err); }
+  label small.err:empty { display: none; }
+  input.bad { border-color: var(--err); }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+  .reset { margin-top: 20px; display: flex; justify-content: flex-end; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 24px; }
+</style>
+<main>
+  <header>
+    <img src="icons/icon.svg" alt="" />
+    <div>
+      <h1>Glöwr</h1>
+      <p>Mine subtitle sentences and audio from S4C, iPlayer and YouTube into Anki.</p>
+    </div>
+  </header>
+
+  <form id="f" autocomplete="off">
+    <section>
+      <h2>Anki <span class="sp"></span><span id="conn" class="conn">Connecting…</span>
+        <button type="button" id="refresh" title="Reload decks and note types"></button></h2>
+      <p class="hint">Cards go through AnkiConnect, so Anki needs to be open.</p>
+      <div id="banner" class="banner"></div>
+      <div class="grid">
+        <label><span>Deck</span><select name="deck"></select></label>
+        <label><span>Note type</span><select name="model"></select></label>
+      </div>
+    </section>
+
+    <section>
+      <h2>Fields</h2>
+      <p class="hint">Which field of the note type each part of the card goes into.</p>
+      <div class="grid">
+        <label><span>Sentence</span><select name="fSentence" data-field></select></label>
+        <label><span>Translation</span><select name="fTranslation" data-field></select></label>
+        <label><span>Audio</span><select name="fAudio" data-field></select>
+          <div class="warnf" id="sameWarn">Audio goes into the same field as the sentence. The sound tag is appended after the text.</div></label>
+        <label><span>Highlighted word</span><select name="fHighlight" data-field data-optional></select></label>
+      </div>
+    </section>
+
+    <section>
+      <h2>Recording &amp; translation</h2>
+      <div class="grid">
+        <label class="switch full"><input type="checkbox" name="autoRecord" />
+          <span>Start recording automatically
+            <small>Capture audio as soon as a video plays. When off, press “Record” in the panel
+              when you want audio for your cards.</small></span></label>
+        <label class="switch full"><input type="checkbox" name="autoTranslate" />
+          <span>Translate automatically
+            <small>Fill in the translation with Google Translate, which is sent the card's sentence.
+              When off, nothing leaves your computer except the card going to Anki; type a
+              translation yourself if you want one.</small></span></label>
+        <label><span>Translate into</span><select name="targetLang"></select></label>
+      </div>
+    </section>
+
+    <details id="advanced">
+      <summary><span id="advIcon"></span>Advanced settings</summary>
+      <p class="hint">You only need these if you've changed how AnkiConnect is set up, or something
+        isn't working.</p>
+
+      <h3>Connections</h3>
+      <div class="grid">
+        <label class="full"><span>AnkiConnect address</span>
+          <input name="ankiUrl" class="mono" type="url" spellcheck="false" data-url />
+          <small class="err" data-err="ankiUrl"></small></label>
+        <label class="full"><span>AnkiConnect API key</span>
+          <input name="ankiKey" class="mono" type="password" spellcheck="false" placeholder="Not set" />
+          <small>Only if you've set <code>apiKey</code> in AnkiConnect's config.</small></label>
+        <label class="full"><span>Translation service address</span>
+          <input name="translateUrl" class="mono" type="url" spellcheck="false" data-url />
+          <small>Must answer like Google Translate's <code>translate_a/single</code>, for example a proxy or mirror.</small>
+          <small class="err" data-err="translateUrl"></small></label>
+      </div>
+
+      <h3>Audio</h3>
+      <div class="grid">
+        <label><span>Audio padding (seconds)</span>
+          <input name="pad" type="number" step="0.05" min="0" max="3" />
+          <small>Extra audio kept before and after each line.</small></label>
+      </div>
+
+      <h3>Subtitle sources</h3>
+      <p class="hint">CSS selector for the on-screen subtitles on each site. Shadow DOM is searched too.
+        The <b>Pick subs</b> button in the on-video panel fills this in for you.</p>
+      <div class="grid" id="sites"></div>
+
+      <div class="reset"><button type="button" id="reset"></button></div>
+    </details>
+  </form>
+  <footer><span id="version"></span> · <a id="repo" style="color:inherit">Source &amp; help</a> · Icons by <a href="https://lucide.dev" style="color:inherit">Lucide</a></footer>
+</main>
+<div id="saved"></div>
+<script src="options.js"></script>
+</html>

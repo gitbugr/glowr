@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="cy">
+<meta charset="utf-8" />
+<title>Demo programme</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden;
+    font-family: system-ui, sans-serif; }
+  .player { position: relative; width: 100vw; height: 100vh; }
+  video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* Same class names as video.js, which S4C's player is built on. */
+  .vjs-text-track-display { position: absolute; left: 0; right: 0; bottom: 9%;
+    text-align: center; pointer-events: none; }
+  .vjs-text-track-cue { display: inline-block; max-width: 70%; padding: 4px 12px;
+    background: rgba(0,0,0,.72); color: #fff; font-size: 30px; line-height: 1.35;
+    border-radius: 3px; }
+  .title { position: absolute; top: 20px; left: 28px; color: rgba(255,255,255,.92);
+    font-size: 15px; letter-spacing: .3px; text-shadow: 0 1px 4px rgba(0,0,0,.4); }
+  .title b { display: block; font-size: 22px; letter-spacing: 0; }
+</style>
+<div class="player">
+  <video id="v" src="/demo.webm" playsinline></video>
+  <div class="title">Pennod 1<b>Ar y Mynydd</b></div>
+  <div class="vjs-text-track-display"><div></div></div>
+</div>
+<script>
+  const v = document.getElementById("v");
+  const box = document.querySelector(".vjs-text-track-display > div");
+  fetch("/cues.json").then((r) => r.json()).then((cues) => {
+    let shown = null;
+    (function tick() {
+      const t = v.currentTime;
+      const c = cues.find((c) => t >= c.start && t < c.end) || null;
+      if (c !== shown) {
+        shown = c;
+        box.replaceChildren();
+        if (c) {
+          const d = document.createElement("div");
+          d.className = "vjs-text-track-cue";
+          d.textContent = c.text;
+          box.appendChild(d);
+        }
+      }
+      requestAnimationFrame(tick);
+    })();
+  });
+</script>
+</html>
